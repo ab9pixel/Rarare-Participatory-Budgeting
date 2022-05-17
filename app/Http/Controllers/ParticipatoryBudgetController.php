@@ -8,19 +8,25 @@ use App\Models\Like;
 use App\Models\Option;
 use App\Models\UserOption;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class ParticipatoryBudgetController extends Controller
 {
 
-    public function list()
+    public function list($count,$user_id)
     {
-        $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->get();
+        if($user_id==0){
+            $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->limit($count)->get();
+        }
+        else{
+            $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id',$user_id)->limit($count)->get();
+        }
         return response()->json($participatory_budget);
     }
 
     public function save(Request $request)
     {
-        $this->validate($request, [
+        $validator = Validator::make($request->all(), [
             'title' => 'required|max:255',
             'description' => 'required',
             'address' => 'required',
@@ -38,6 +44,15 @@ class ParticipatoryBudgetController extends Controller
             'proposed_summary'=> 'required',
             'budget_benefits'=> 'required',
         ]);
+
+        if ($validator->fails()) {
+            $messages = $validator->messages()->all();
+
+            return response()->json([
+                'status' => 'Error',
+                'message' => $messages[0],
+            ], 200);
+        }
 
         if(isset($request->id)){
             $participatory_budget = ParticipatoryBudget::find($request->id);
@@ -85,11 +100,20 @@ class ParticipatoryBudgetController extends Controller
 
     public function comment(Request $request)
     {
-        $this->validate($request, [
+        $validator = Validator::make($request->all(), [
             'user_id' => 'required',
             'comment' => 'required',
             'parent_id' => 'required',
         ]);
+
+        if ($validator->fails()) {
+            $messages = $validator->messages()->all();
+
+            return response()->json([
+                'status' => 'Error',
+                'message' => $messages[0],
+            ], 200);
+        }
 
         $comment = new Comment;
         $comment->user_id = $request->user_id;
@@ -97,36 +121,59 @@ class ParticipatoryBudgetController extends Controller
         $comment->comment = $request->comment;
         $comment->save();
 
-        return response()->json($comment);
+        $comments = Comment::where('parent_id', $request->parent_id)->get();
+        return response()->json($comments);
     }
 
     public function like(Request $request)
     {
-        $this->validate($request, [
+        $validator = Validator::make($request->all(), [
             'user_id' => 'required',
             'parent_id' => 'required',
         ]);
+
+        if ($validator->fails()) {
+            $messages = $validator->messages()->all();
+
+            return response()->json([
+                'status' => 'Error',
+                'message' => $messages[0],
+            ], 200);
+        }
+
         $liked=Like::where(['user_id'=>$request->user_id,'parent_id'=>$request->parent_id])->first();
         if(!is_null($liked)){
             $liked->delete();
-            return response()->json(['message'=>'Disliked']);
-        }
+            $likes = Like::where(['parent_id' => $request->parent_id])->count();
+
+            return response()->json($likes);        }
         
         $like = new Like;
         $like->user_id = $request->user_id;
         $like->parent_id = $request->parent_id;
         $like->save();
 
-        return response()->json($like);
+        $likes = Like::where(['parent_id' => $request->parent_id])->count();
+
+        return response()->json($likes);
     }
 
     public function user_option(Request $request)
     {
-        $this->validate($request, [
+        $validator = Validator::make($request->all(), [
             'user_id' => 'required',
             'parent_id' => 'required',
             'option_id' => 'required',
         ]);
+
+        if ($validator->fails()) {
+            $messages = $validator->messages()->all();
+
+            return response()->json([
+                'status' => 'Error',
+                'message' => $messages[0],
+            ], 200);
+        }
 
         $user_option = new UserOption;
         $user_option->user_id = $request->user_id;
@@ -134,7 +181,13 @@ class ParticipatoryBudgetController extends Controller
         $user_option->option_id = $request->option_id;
         $user_option->save();
 
-        return response()->json($user_option);
+        $option_array=array();
+        $option=Option::where(['parent_id'=>$request->parent_id])->get();
+        foreach($option as $item){
+            $option_array[$item->id]=count(UserOption::where(['option_id'=>$item->id])->get());
+        }
+
+        return response()->json($option_array);
     }
 
     public function delete($id)
