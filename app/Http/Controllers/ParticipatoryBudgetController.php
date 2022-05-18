@@ -181,8 +181,16 @@ class ParticipatoryBudgetController extends Controller
         $user_option->option_id = $request->option_id;
         $user_option->save();
 
+        $participatory_budget=ParticipatoryBudget::find($request->parent_id);
+
         $option_array=array();
         $option=Option::where(['parent_id'=>$request->parent_id])->get();
+
+        if($participatory_budget->audience<=count($option)){
+            $participatory_budget->status=1;
+            $participatory_budget->save();
+        }
+
         foreach($option as $item){
             $option_array[$item->id]=count(UserOption::where(['option_id'=>$item->id])->get());
         }
