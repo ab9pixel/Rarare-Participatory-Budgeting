@@ -11,7 +11,7 @@ class ParticipatoryBudget extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    protected $appends = ['liked_users','user','exist_users','marked_option'];
+    protected $appends = ['liked_users','user','exist_users','marked_option','progress'];
 
     public function comments()
     {
@@ -41,6 +41,14 @@ class ParticipatoryBudget extends Model
     public function getExistUsersAttribute()
     {
         return $this->user_option->pluck('user_id');
+    }
+
+    public function getProgressAttribute()
+    {
+        $user_option=count($this->user_option()->get());
+        $audience=$this->audience;
+        $percentage=round(($user_option/$audience)*100);
+        return $percentage;
     }
 
     public function getUserAttribute()
