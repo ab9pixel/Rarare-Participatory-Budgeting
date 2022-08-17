@@ -11,7 +11,7 @@ class ParticipatoryBudget extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    protected $appends = ['liked_users','user','exist_users','marked_option','progress'];
+    protected $appends = ['liked_users','user','exist_users','marked_option','progress','total_record'];
 
     public function comments()
     {
@@ -50,6 +50,11 @@ class ParticipatoryBudget extends Model
         $percentage=round(($user_option/$audience)*100);
         return $percentage;
     }
+
+    public function getTotalRecordAttribute()
+	{
+		return $this->count();
+	}
 
     public function getUserAttribute()
     {
