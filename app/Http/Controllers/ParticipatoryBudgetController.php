@@ -122,6 +122,19 @@ class ParticipatoryBudgetController extends Controller
         $comment->save();
 
         $comments = Comment::where('parent_id', $request->parent_id)->get();
+
+        $participatory_budget = ParticipatoryBudget::find($request->parent_id);
+        if ($participatory_budget->participation == 1) {
+            $post['user_id'] = $participatory_budget->user_id;
+            $post['action'] = "Commented";
+            $post['type'] = "Participatory Budget";
+            $post['vote_question'] = $participatory_budget->vote_question;
+            $post['message'] = $participatory_budget->description;
+            $post['url'] = "google.com";
+            $post['title'] = $participatory_budget->title;
+
+            $this->send_notification($post);
+        }
         return response()->json($comments);
     }
 
@@ -154,6 +167,19 @@ class ParticipatoryBudgetController extends Controller
         $like->save();
 
         $likes = Like::where(['parent_id' => $request->parent_id])->count();
+
+        $participatory_budget = ParticipatoryBudget::find($request->parent_id);
+        if ($participatory_budget->participation == 1) {
+            $post['user_id'] = $participatory_budget->user_id;
+            $post['action'] = "Liked";
+            $post['type'] = "Participatory Budget";
+            $post['vote_question'] = $participatory_budget->vote_question;
+            $post['message'] = $participatory_budget->description;
+            $post['url'] = "google.com";
+            $post['title'] = $participatory_budget->title;
+
+            $this->send_notification($post);
+        }
 
         return response()->json($likes);
     }
@@ -195,6 +221,19 @@ class ParticipatoryBudgetController extends Controller
             $option_array[$item->id]=count(UserOption::where(['option_id'=>$item->id])->get());
         }
 
+        $participatory_budget = ParticipatoryBudget::find($request->parent_id);
+        if ($participatory_budget->participation == 1) {
+            $post['user_id'] = $participatory_budget->user_id;
+            $post['action'] = "Voted";
+            $post['type'] = "Participatory Budget";
+            $post['vote_question'] = $participatory_budget->vote_question;
+            $post['message'] = $participatory_budget->description;
+            $post['url'] = "google.com";
+            $post['title'] = $participatory_budget->title;
+
+            $this->send_notification($post);
+        }
+
         return response()->json($option_array);
     }
 
@@ -209,5 +248,36 @@ class ParticipatoryBudgetController extends Controller
             $participatory_budget->delete();
         }
         return response()->json(['message'=>'Deleted']);
+    }
+
+    public function send_notification($post)
+    {
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://rrci.staging.rarare.com/proposal/subscribe/email',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => array(
+                'title' => $post['title'],
+                'type' => $post['type'],
+                'vote_question' => $post['vote_question'],
+                'message' => $post['message'],
+                'action' => $post['action'],
+                'url' => $post['url'],
+                'user_id' => $post['user_id']
+            ),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        return true;
     }
 }
