@@ -130,7 +130,7 @@ class ParticipatoryBudgetController extends Controller
             $post['type'] = "Participatory Budget";
             $post['vote_question'] = $participatory_budget->vote_question;
             $post['message'] = $participatory_budget->description;
-            $post['url'] = "google.com";
+            $post['url'] = "https://staging.rarare.com/proposal?id=".$request->parent_id;
             $post['title'] = $participatory_budget->title;
 
             $this->send_notification($post);
@@ -175,7 +175,7 @@ class ParticipatoryBudgetController extends Controller
             $post['type'] = "Participatory Budget";
             $post['vote_question'] = $participatory_budget->vote_question;
             $post['message'] = $participatory_budget->description;
-            $post['url'] = "google.com";
+            $post['url'] = "https://staging.rarare.com/proposal?id=".$request->parent_id;
             $post['title'] = $participatory_budget->title;
 
             $this->send_notification($post);
@@ -228,7 +228,7 @@ class ParticipatoryBudgetController extends Controller
             $post['type'] = "Participatory Budget";
             $post['vote_question'] = $participatory_budget->vote_question;
             $post['message'] = $participatory_budget->description;
-            $post['url'] = "google.com";
+            $post['url'] = "https://staging.rarare.com/proposal?id=".$request->parent_id;
             $post['title'] = $participatory_budget->title;
 
             $this->send_notification($post);
