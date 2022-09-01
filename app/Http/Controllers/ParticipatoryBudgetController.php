@@ -13,13 +13,12 @@ use Illuminate\Support\Facades\Validator;
 class ParticipatoryBudgetController extends Controller
 {
 
-    public function list($count,$user_id)
+    public function list($count, $user_id)
     {
-        if($user_id==0){
+        if ($user_id == 0) {
             $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->limit($count)->get();
-        }
-        else{
-            $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id',$user_id)->limit($count)->get();
+        } else {
+            $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id', $user_id)->limit($count)->get();
         }
         return response()->json($participatory_budget);
     }
@@ -39,10 +38,10 @@ class ParticipatoryBudgetController extends Controller
             'end_time' => 'required',
             'user_id' => 'required',
             'participation' => 'required',
-            'vote_question'=> 'required',
-            'budget'=> 'required',
-            'proposed_summary'=> 'required',
-            'budget_benefits'=> 'required',
+            'vote_question' => 'required',
+            'budget' => 'required',
+            'proposed_summary' => 'required',
+            'budget_benefits' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -54,10 +53,9 @@ class ParticipatoryBudgetController extends Controller
             ], 200);
         }
 
-        if(isset($request->id)){
+        if (isset($request->id)) {
             $participatory_budget = ParticipatoryBudget::find($request->id);
-        }
-        else{
+        } else {
             $participatory_budget = new ParticipatoryBudget;
         }
 
@@ -78,7 +76,7 @@ class ParticipatoryBudgetController extends Controller
         $participatory_budget->budget_benefits = $request->budget_benefits;
         $participatory_budget->user_id = $request->user_id;
         if ($participatory_budget->save()) {
-            if(!isset($request->id)){
+            if (!isset($request->id)) {
                 foreach ($request->vote_option as $key => $vote_option) {
                     $option = new Option;
                     $option->parent_id = $participatory_budget->id;
@@ -130,9 +128,9 @@ class ParticipatoryBudgetController extends Controller
             $post['type'] = "Participatory Budget";
             $post['vote_question'] = $participatory_budget->vote_question;
             $post['message'] = $participatory_budget->description;
-            $post['url'] = "https://staging.rarare.com/budget-proposal?id=".$request->parent_id;
+            $post['url'] = "https://staging.rarare.com/budget-proposal?id=" . $request->parent_id;
             $post['title'] = $participatory_budget->title;
-
+            $post['sender_id'] = $request->user_id;
             $this->send_notification($post);
         }
         return response()->json($comments);
@@ -154,13 +152,14 @@ class ParticipatoryBudgetController extends Controller
             ], 200);
         }
 
-        $liked=Like::where(['user_id'=>$request->user_id,'parent_id'=>$request->parent_id])->first();
-        if(!is_null($liked)){
+        $liked = Like::where(['user_id' => $request->user_id, 'parent_id' => $request->parent_id])->first();
+        if (!is_null($liked)) {
             $liked->delete();
             $likes = Like::where(['parent_id' => $request->parent_id])->count();
 
-            return response()->json($likes);        }
-        
+            return response()->json($likes);
+        }
+
         $like = new Like;
         $like->user_id = $request->user_id;
         $like->parent_id = $request->parent_id;
@@ -175,8 +174,9 @@ class ParticipatoryBudgetController extends Controller
             $post['type'] = "Participatory Budget";
             $post['vote_question'] = $participatory_budget->vote_question;
             $post['message'] = $participatory_budget->description;
-            $post['url'] = "https://staging.rarare.com/budget-proposal?id=".$request->parent_id;
+            $post['url'] = "https://staging.rarare.com/budget-proposal?id=" . $request->parent_id;
             $post['title'] = $participatory_budget->title;
+            $post['sender_id'] = $request->user_id;
 
             $this->send_notification($post);
         }
@@ -207,18 +207,18 @@ class ParticipatoryBudgetController extends Controller
         $user_option->option_id = $request->option_id;
         $user_option->save();
 
-        $participatory_budget=ParticipatoryBudget::find($request->parent_id);
+        $participatory_budget = ParticipatoryBudget::find($request->parent_id);
 
-        $option_array=array();
-        $option=Option::where(['parent_id'=>$request->parent_id])->get();
+        $option_array = array();
+        $option = Option::where(['parent_id' => $request->parent_id])->get();
 
-        if($participatory_budget->audience<=count($option)){
-            $participatory_budget->status=1;
+        if ($participatory_budget->audience <= count($option)) {
+            $participatory_budget->status = 1;
             $participatory_budget->save();
         }
 
-        foreach($option as $item){
-            $option_array[$item->id]=count(UserOption::where(['option_id'=>$item->id])->get());
+        foreach ($option as $item) {
+            $option_array[$item->id] = count(UserOption::where(['option_id' => $item->id])->get());
         }
 
         $participatory_budget = ParticipatoryBudget::find($request->parent_id);
@@ -228,9 +228,9 @@ class ParticipatoryBudgetController extends Controller
             $post['type'] = "Participatory Budget";
             $post['vote_question'] = $participatory_budget->vote_question;
             $post['message'] = $participatory_budget->description;
-            $post['url'] = "https://staging.rarare.com/budget-proposal?id=".$request->parent_id;
+            $post['url'] = "https://staging.rarare.com/budget-proposal?id=" . $request->parent_id;
             $post['title'] = $participatory_budget->title;
-
+            $post['sender_id'] = $request->user_id;
             $this->send_notification($post);
         }
 
@@ -239,15 +239,15 @@ class ParticipatoryBudgetController extends Controller
 
     public function delete($id)
     {
-        $participatory_budget = ParticipatoryBudget::with('comments', 'options','likes','user_option')->find($id);
-        if(!is_null($participatory_budget)){
+        $participatory_budget = ParticipatoryBudget::with('comments', 'options', 'likes', 'user_option')->find($id);
+        if (!is_null($participatory_budget)) {
             $participatory_budget->comments()->delete();
             $participatory_budget->user_option()->delete();
             $participatory_budget->likes()->delete();
             $participatory_budget->options()->delete();
             $participatory_budget->delete();
         }
-        return response()->json(['message'=>'Deleted']);
+        return response()->json(['message' => 'Deleted']);
     }
 
     public function send_notification($post)
@@ -270,7 +270,8 @@ class ParticipatoryBudgetController extends Controller
                 'message' => $post['message'],
                 'action' => $post['action'],
                 'url' => $post['url'],
-                'user_id' => $post['user_id']
+                'user_id' => $post['user_id'],
+                'sender_id' => $post['sender_id']
             ),
         ));
 
