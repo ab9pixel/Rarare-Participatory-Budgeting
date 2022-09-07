@@ -15,10 +15,18 @@ class ParticipatoryBudgetController extends Controller
 
     public function list($count, $user_id)
     {
-        if ($user_id == 0) {
-            $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->limit($count)->get();
+        if ($count != 0) {
+            if ($user_id == 0) {
+                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->limit($count)->get();
+            } else {
+                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id', $user_id)->limit($count)->get();
+            }
         } else {
-            $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id', $user_id)->limit($count)->get();
+            if ($user_id == 0) {
+                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->get();
+            } else {
+                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id', $user_id)->get();
+            }
         }
         return response()->json($participatory_budget);
     }
