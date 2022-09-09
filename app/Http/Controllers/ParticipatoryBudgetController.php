@@ -17,15 +17,15 @@ class ParticipatoryBudgetController extends Controller
     {
         if ($count != 0) {
             if ($user_id == 0) {
-                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->limit($count)->get();
+                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->orderBy('id','desc')->limit($count)->get();
             } else {
-                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id', $user_id)->limit($count)->get();
+                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id', $user_id)->orderBy('id','desc')->limit($count)->get();
             }
         } else {
             if ($user_id == 0) {
-                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->get();
+                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->orderBy('id','desc')->get();
             } else {
-                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id', $user_id)->get();
+                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id', $user_id)->orderBy('id','desc')->get();
             }
         }
         return response()->json($participatory_budget);
