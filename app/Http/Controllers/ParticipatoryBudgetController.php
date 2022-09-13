@@ -17,15 +17,15 @@ class ParticipatoryBudgetController extends Controller
     {
         if ($count != 0) {
             if ($type == "l") {
-                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->orderBy('created_at','desc')->limit($count)->get();
+                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->orderBy('status', 'desc')->orderBy('created_at', 'desc')->limit($count)->get();
             } else {
-                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id', $user_id)->orderBy('created_at','desc')->limit($count)->get();
+                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id', $user_id)->orderBy('status', 'desc')->orderBy('created_at', 'desc')->limit($count)->get();
             }
         } else {
             if ($type == "l") {
-                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->orderBy('created_at','desc')->get();
+                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->orderBy('status', 'desc')->orderBy('created_at', 'desc')->get();
             } else {
-                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id', $user_id)->orderBy('created_at','desc')->get();
+                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id', $user_id)->orderBy('status', 'desc')->orderBy('created_at', 'desc')->get();
             }
         }
         
