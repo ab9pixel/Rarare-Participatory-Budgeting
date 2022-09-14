@@ -112,7 +112,7 @@ class ParticipatoryBudgetController extends Controller
         $participatory_budget->budget = $request->budget;
         $participatory_budget->proposed_summary = $request->proposed_summary;
         $participatory_budget->budget_benefits = $request->budget_benefits;
-	    $consensus_forming->timezone = $request->timezone;
+	    $participatory_budget->timezone = $request->timezone;
         $participatory_budget->user_id = $request->user_id;
         if ($participatory_budget->save()) {
             if (!isset($request->id)) {
