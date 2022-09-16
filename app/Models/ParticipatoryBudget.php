@@ -106,7 +106,7 @@ class ParticipatoryBudget extends Model
 	    $end_dt->setTimezone(new \DateTimeZone('UTC'));
 	    $end=$end_dt->format('Y-m-d h:i A');
 
-	    if($start < $now && $end > $now){
+	    if($start <= $now && $end >= $now){
 	    	return "Ongoing";
 	    }
 
