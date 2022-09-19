@@ -78,8 +78,9 @@ class ParticipatoryBudgetController extends Controller
             'participation' => 'required',
             'vote_question' => 'required',
             'budget' => 'required',
-            'proposed_summary' => 'required',
+            'proposed_summary' => 'required', 
             'budget_benefits' => 'required',
+            'currency' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -114,6 +115,7 @@ class ParticipatoryBudgetController extends Controller
         $participatory_budget->budget_benefits = $request->budget_benefits;
 	    $participatory_budget->timezone = $request->timezone;
         $participatory_budget->user_id = $request->user_id;
+        $participatory_budget->currency = $request->currency;
         if ($participatory_budget->save()) {
             if (!isset($request->id)) {
                 foreach ($request->vote_option as $key => $vote_option) {
