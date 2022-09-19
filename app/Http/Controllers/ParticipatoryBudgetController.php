@@ -165,6 +165,7 @@ class ParticipatoryBudgetController extends Controller
         $participatory_budget = ParticipatoryBudget::find($request->parent_id);
         if ($participatory_budget->participation == 1) {
             $post['user_id'] = $participatory_budget->user_id;
+            $post['object_id'] = $participatory_budget->id;
             $post['action'] = "Commented";
             $post['type'] = "Participatory Budget";
             $post['vote_question'] = $participatory_budget->vote_question;
@@ -211,6 +212,7 @@ class ParticipatoryBudgetController extends Controller
         $participatory_budget = ParticipatoryBudget::find($request->parent_id);
         if ($participatory_budget->participation == 1) {
             $post['user_id'] = $participatory_budget->user_id;
+            $post['object_id'] = $participatory_budget->id;
             $post['action'] = "Liked";
             $post['type'] = "Participatory Budget";
             $post['vote_question'] = $participatory_budget->vote_question;
@@ -265,6 +267,7 @@ class ParticipatoryBudgetController extends Controller
         $participatory_budget = ParticipatoryBudget::find($request->parent_id);
         if ($participatory_budget->participation == 1) {
             $post['user_id'] = $participatory_budget->user_id;
+            $post['object_id'] = $participatory_budget->id;
             $post['action'] = "Voted";
             $post['type'] = "Participatory Budget";
             $post['vote_question'] = $participatory_budget->vote_question;
@@ -312,6 +315,7 @@ class ParticipatoryBudgetController extends Controller
                 'action' => $post['action'],
                 'url' => $post['url'],
                 'user_id' => $post['user_id'],
+                'object_id' => $post['object_id'],
                 'sender_id' => $post['sender_id']
             ),
         ));
