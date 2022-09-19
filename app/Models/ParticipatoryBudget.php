@@ -107,13 +107,21 @@ class ParticipatoryBudget extends Model
 	    $end=$end_dt->format('Y-m-d h:i A');
 
 	    if($start <= $now && $end >= $now){
-	    	return "In Progress";
-	    }
+            $status = Eloquent::find($id);
+            $status->status = '1';
+            $status->update();
+            return "In Progress";
+        }
 
-	    if($start > $now){
-	    	return "Pending";
-	    }
-
-	    return "Completed";
+        if ($start > $now) {
+            $status = Eloquent::find($id);
+            $status->status = '0';
+            $status->update();
+            return "Pending";
+        }
+            $status = Eloquent::find($id);
+            $status->status = '2';
+            $status->update();
+            return "Completed";
     }
 }
