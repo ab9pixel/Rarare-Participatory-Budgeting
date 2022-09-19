@@ -124,7 +124,6 @@ class ParticipatoryBudgetController extends Controller
                     $option->vote_option = $vote_option;
                     $option->vote_description = $request->vote_description[$key];
                     $option->save();
-                    $test;
                 }
             }
         }
