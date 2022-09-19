@@ -11,7 +11,7 @@ class ParticipatoryBudget extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    protected $appends = ['liked_users','user','exist_users','marked_option','progress','total_record'];
+    protected $appends = ['status','liked_users','user','exist_users','marked_option','progress','total_record'];
 
     public function comments()
     {
@@ -106,14 +106,14 @@ class ParticipatoryBudget extends Model
 	    $end_dt->setTimezone(new \DateTimeZone('UTC'));
 	    $end=$end_dt->format('Y-m-d h:i A');
 
-	    if($start < $now && $end > $now){
-	    	return 1;
+	    if($start <= $now && $end >= $now){
+	    	return "Ongoing";
 	    }
 
 	    if($start > $now){
-	    	return 0;
+	    	return "Pending";
 	    }
 
-	    return 2;
+	    return "Past";
     }
 }
