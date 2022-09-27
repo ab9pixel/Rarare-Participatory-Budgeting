@@ -63,34 +63,34 @@ class ParticipatoryBudgetController extends Controller
 
     public function save(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'title' => 'required|max:255',
-            'description' => 'required',
-            'address' => 'required',
-            'latitude' => 'required',
-            'longitude' => 'required',
-            'audience' => 'required',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date',
-            'start_time' => 'required',
-            'end_time' => 'required',
-            'user_id' => 'required',
+        $validator = Validator::make( $request->all(), [
+            'title'         => 'required|max:255',
+            'description'   => 'required',
+            'address'       => 'required',
+            'latitude'      => 'required',
+            'longitude'     => 'required',
+            'audience'      => 'required',
+            'start_date'    => 'required|date',
+            'end_date'      => 'required|date',
+            'start_time'    => 'required|date_format:H:i',
+            'end_time'      => 'required|date_format:H:i|after:start_time',
+            'user_id'       => 'required',
             'participation' => 'required',
             'vote_question' => 'required',
-            'budget' => 'required',
-            'proposed_summary' => 'required', 
+            'budget'        => 'required',
+            'proposed_summary' => 'required',
             'budget_benefits' => 'required',
             'currency' => 'required',
         ]);
-
-        if ($validator->fails()) {
+        if ( $validator->fails() ) {
             $messages = $validator->messages()->all();
 
-            return response()->json([
-                'status' => 'Error',
+            return response()->json( [
+                'status'  => 'Error',
                 'message' => $messages[0],
-            ], 200);
+            ], 200 );
         }
+
 
         if (isset($request->id)) {
             $participatory_budget = ParticipatoryBudget::find($request->id);
@@ -113,11 +113,13 @@ class ParticipatoryBudgetController extends Controller
         $participatory_budget->budget = $request->budget;
         $participatory_budget->proposed_summary = $request->proposed_summary;
         $participatory_budget->budget_benefits = $request->budget_benefits;
-	    $participatory_budget->timezone = $request->timezone;
+        $participatory_budget->timezone = $request->timezone;
         $participatory_budget->user_id = $request->user_id;
         $participatory_budget->currency = $request->currency;
+
         if ($participatory_budget->save()) {
             if (!isset($request->id)) {
+
                 foreach ($request->vote_option as $key => $vote_option) {
                     $option = new Option;
                     $option->parent_id = $participatory_budget->id;
@@ -128,7 +130,8 @@ class ParticipatoryBudgetController extends Controller
             }
         }
 
-        return response()->json($participatory_budget);
+            return response()->json($participatory_budget);
+
     }
 
     public function find($id)
