@@ -63,6 +63,7 @@ class ParticipatoryBudgetController extends Controller
 
     public function save(Request $request)
     {
+
         $validator = Validator::make( $request->all(), [
             'title'         => 'required|max:255',
             'description'   => 'required',
@@ -72,8 +73,8 @@ class ParticipatoryBudgetController extends Controller
             'audience'      => 'required',
             'start_date'    => 'required|date',
             'end_date'      => 'required|date',
-            'start_time'    => 'required|date_format:H:i',
-            'end_time'      => 'required|date_format:H:i|after:start_time',
+            'start_time'    => 'required',
+            'end_time'      => 'required',
             'user_id'       => 'required',
             'participation' => 'required',
             'vote_question' => 'required',
@@ -129,6 +130,7 @@ class ParticipatoryBudgetController extends Controller
                 }
             }
         }
+
 
             return response()->json($participatory_budget);
 
