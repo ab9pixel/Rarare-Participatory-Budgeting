@@ -50,7 +50,7 @@ class ParticipatoryBudgetController extends Controller
 				    if ($mile > 30) {
 					    $participatory_budget->forget($key);
 				    } else {
-					    array_push($data, $budget);
+                        $data[] = $budget;
 				    }
 			    }
 		    }
@@ -58,7 +58,13 @@ class ParticipatoryBudgetController extends Controller
 		    $data = $participatory_budget;
 	    }
 
-	    return response()->json($data);
+        if(count($data) > 0){
+
+        }else{
+            $data = [];
+        }
+
+        return response()->json(['msg' => 'success', 'data' => $data, 'count' => count($data)]);
     }
 
     public function save(Request $request)
