@@ -19,7 +19,7 @@ $router->get('/', function () use ($router) {
 
 
 $router->group(['prefix'=>'api'],function() use ($router){
-    $router->get('list/{count}/{user_id}/{type}','ParticipatoryBudgetController@list');
+    $router->get('list/{count}/{user_id}/{type}/{isHome}','ParticipatoryBudgetController@list');
     $router->get('find/{id}','ParticipatoryBudgetController@find');
     $router->get('delete/{id}','ParticipatoryBudgetController@delete');
 

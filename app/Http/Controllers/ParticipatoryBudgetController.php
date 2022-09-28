@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Validator;
 class ParticipatoryBudgetController extends Controller
 {
 
-    public function list($count, $user_id,$type)
+    public function list($count, $user_id,$type, $isHome)
     {
         if ($count != 0) {
             if ($type == "l") {
