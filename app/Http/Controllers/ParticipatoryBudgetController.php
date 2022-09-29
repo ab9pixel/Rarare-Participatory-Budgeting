@@ -15,56 +15,56 @@ class ParticipatoryBudgetController extends Controller
 
     public function list($count, $user_id,$type, $isHome)
     {
+        $participatory = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->get();
+
+        $user = $this->get_user($user_id);
+        $result = array();
+        if (!is_null($user->latitude) && !is_null($user->longitude)) {
+            foreach ($participatory as $key => $budget) {
+                $source = [
+                    'lat' => $budget->latitude,
+                    'lng' => $budget->longitude
+                ];
+
+                $destination = [
+                    'lat' => $user->latitude,
+                    'lng' => $user->longitude
+                ];
+
+                $mile = $this->calculate_distance($source, $destination);
+
+                if ($mile > 30) {
+                    $participatory->forget($key);
+                } else {
+                    $result[] = $budget->id;
+                }
+            }
+        }else{
+            return response()->json(['Error' => 'User Latitude Or Longitude is empty']);
+        }
+        if(count($result) > 0){
+
+        }else{
+            $data = [];
+            return response()->json(['msg' => 'success', 'data' => $data, 'count' => count($data)]);
+        }
+
         if ($count != 0) {
             if ($type == "l") {
-                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->orderBy('status', 'desc')->orderBy('created_at', 'desc')->limit($count)->get();
+                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->whereIn('id', $result)->orderBy('status', 'desc')->orderBy('created_at', 'desc')->limit($count)->get();
             } else {
                 $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id', $user_id)->orderBy('status', 'desc')->orderBy('created_at', 'desc')->limit($count)->get();
             }
         } else {
             if ($type == "l") {
-                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->orderBy('status', 'desc')->orderBy('created_at', 'desc')->get();
+                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->whereIn('id', $result)->orderBy('status', 'desc')->orderBy('created_at', 'desc')->get();
             } else {
                 $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id', $user_id)->orderBy('status', 'desc')->orderBy('created_at', 'desc')->get();
             }
         }
-        
-        
-        $data = [];
-	    if ($type == "l") {
-		    $user = $this->get_user($user_id);
-		    if (!is_null($user->latitude)) {
-			    foreach ($participatory_budget as $key => $budget) {
-				    $source = [
-					    'lat' => $budget->latitude,
-					    'lng' => $budget->longitude
-				    ];
 
-				    $destination = [
-					    'lat' => $user->latitude,
-					    'lng' => $user->longitude
-				    ];
 
-				    $mile = $this->calculate_distance($source, $destination);
-
-				    if ($mile > 30) {
-					    $participatory_budget->forget($key);
-				    } else {
-                        $data[] = $budget;
-				    }
-			    }
-		    }
-	    } else {
-		    $data = $participatory_budget;
-	    }
-
-        if(count($data) > 0){
-
-        }else{
-            $data = [];
-        }
-
-        return response()->json(['msg' => 'success', 'data' => $data, 'count' => count($data)]);
+        return response()->json(['msg' => 'success', 'data' => $participatory_budget, 'count' => count($participatory_budget)]);
     }
 
     public function save(Request $request)
@@ -138,7 +138,7 @@ class ParticipatoryBudgetController extends Controller
         }
 
 
-            return response()->json($participatory_budget);
+        return response()->json($participatory_budget);
 
     }
 
@@ -339,38 +339,38 @@ class ParticipatoryBudgetController extends Controller
     }
 
     public function get_user($id)
-	{
-		$curl = curl_init();
+    {
+        $curl = curl_init();
 
-		curl_setopt_array($curl, array(
-			CURLOPT_URL => 'https://rrci.staging.rarare.com/user/' . $id,
-			CURLOPT_RETURNTRANSFER => true,
-			CURLOPT_ENCODING => '',
-			CURLOPT_MAXREDIRS => 10,
-			CURLOPT_TIMEOUT => 0,
-			CURLOPT_FOLLOWLOCATION => true,
-			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-			CURLOPT_CUSTOMREQUEST => 'GET',
-		));
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://rrci.staging.rarare.com/user/' . $id,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+        ));
 
-		$response = curl_exec($curl);
+        $response = curl_exec($curl);
 
-		curl_close($curl);
-		return json_decode($response);
-	}
+        curl_close($curl);
+        return json_decode($response);
+    }
 
-	function calculate_distance($source, $destination)
-	{
-		$lat1  = floatval($source['lat']);
-		$lon1  = floatval($source['lng']);
-		$lat2  = floatval($destination['lat']);
-		$lon2  = floatval($destination['lng']);
-		$theta = $lon1 - $lon2;
-		$dist  = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
-		$dist  = acos($dist);
-		$dist  = rad2deg($dist);
-		$miles = $dist * 60 * 1.1515;
+    function calculate_distance($source, $destination)
+    {
+        $lat1  = floatval($source['lat']);
+        $lon1  = floatval($source['lng']);
+        $lat2  = floatval($destination['lat']);
+        $lon2  = floatval($destination['lng']);
+        $theta = $lon1 - $lon2;
+        $dist  = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
+        $dist  = acos($dist);
+        $dist  = rad2deg($dist);
+        $miles = $dist * 60 * 1.1515;
 
-		return $miles;
-	}
+        return $miles;
+    }
 }
