@@ -46,25 +46,25 @@ class ParticipatoryBudgetController extends Controller
 
         }else{
             $data = [];
-            return response()->json(['msg' => 'success', 'data' => $data, 'count' => count($data)]);
+            return response()->json(['msg' => 'success', 'data' => $data, 'count' => count($participatory)]);
         }
 
         if ($count != 0) {
             if ($type == "l") {
-                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->whereIn('id', $result)->orderBy('status', 'desc')->orderBy('created_at', 'desc')->limit($count)->get();
+                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->whereIn('id', $result)->orderBy( 'created_at', 'desc' )->orderByRaw('CASE WHEN status = 1 THEN 1 WHEN status = 0 THEN 2 WHEN status = 2 THEN 3 END')->limit($count)->get();
             } else {
-                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id', $user_id)->orderBy('status', 'desc')->orderBy('created_at', 'desc')->limit($count)->get();
+                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id', $user_id)->orderBy( 'created_at', 'desc' )->orderByRaw('CASE WHEN status = 1 THEN 1 WHEN status = 0 THEN 2 WHEN status = 2 THEN 3 END')->limit($count)->get();
             }
         } else {
             if ($type == "l") {
-                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->whereIn('id', $result)->orderBy('status', 'desc')->orderBy('created_at', 'desc')->get();
+                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->whereIn('id', $result)->orderBy( 'created_at', 'desc' )->orderByRaw('CASE WHEN status = 1 THEN 1 WHEN status = 0 THEN 2 WHEN status = 2 THEN 3 END')->get();
             } else {
-                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id', $user_id)->orderBy('status', 'desc')->orderBy('created_at', 'desc')->get();
+                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id', $user_id)->orderBy( 'created_at', 'desc' )->orderByRaw('CASE WHEN status = 1 THEN 1 WHEN status = 0 THEN 2 WHEN status = 2 THEN 3 END')->get();
             }
         }
 
 
-        return response()->json(['msg' => 'success', 'data' => $participatory_budget, 'count' => count($participatory_budget)]);
+        return response()->json(['msg' => 'success', 'data' => $participatory_budget, 'count' => count($participatory)]);
     }
 
     public function save(Request $request)
