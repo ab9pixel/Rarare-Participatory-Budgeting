@@ -109,14 +109,14 @@ class ParticipatoryBudget extends Model
 
 	    if($start <= $now && $end >= $now){
             $status = ParticipatoryBudget::find($id);
-            $status->status = '1';
+            $status->status = '0';
             $status->update();
             return "In Progress";
         }
 
         if ($start > $now) {
             $status = ParticipatoryBudget::find($id);
-            $status->status = '0';
+            $status->status = '1';
             $status->update();
             return "Pending";
         }
