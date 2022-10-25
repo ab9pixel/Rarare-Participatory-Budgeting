@@ -16,7 +16,10 @@ class ParticipatoryBudgetController extends Controller
     public function list($count, $user_id,$type, $isHome)
     {
         $participatory = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->get();
-
+        if($count != 0 && $user_id == 0 && $type == 'l'){
+            $participatory = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->orderBy( 'created_at', 'desc' )->limit($count)->get();
+            return response()->json(['msg' => 'success', 'data' => $participatory, 'count' => count($participatory)]);
+        }
         $user = $this->get_user($user_id);
         $result = array();
         if (!is_null($user->latitude) && !is_null($user->longitude)) {
