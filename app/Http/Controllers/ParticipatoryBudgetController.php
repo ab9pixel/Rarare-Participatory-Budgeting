@@ -13,367 +13,367 @@ use Illuminate\Support\Facades\Validator;
 class ParticipatoryBudgetController extends Controller
 {
 
-    public function list($count, $user_id,$type, $isHome)
-    {
-        $participatory = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->get();
-        if($count != 0 && $user_id == 0 && $type == 'l'){
-            $participatory = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->orderBy( 'created_at', 'desc' )->limit($count)->get();
-            return response()->json(['msg' => 'success', 'data' => $participatory, 'count' => count($participatory)]);
-        }
-        $user = $this->get_user($user_id);
-        $result = array();
-        if (!is_null($user->latitude) && !is_null($user->longitude)) {
-            foreach ($participatory as $key => $budget) {
-                $source = [
-                    'lat' => $budget->latitude,
-                    'lng' => $budget->longitude
-                ];
+	public function list($count, $user_id,$type, $isHome)
+	{
+		$participatory = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->get();
+		if($count != 0 && $user_id == 0 && $type == 'l'){
+			$participatory = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->orderBy( 'created_at', 'desc' )->limit($count)->get();
+			return response()->json(['msg' => 'success', 'data' => $participatory, 'count' => count($participatory)]);
+		}
+		$user = $this->get_user($user_id);
+		$result = array();
+		if (!is_null($user->latitude) && !is_null($user->longitude)) {
+			foreach ($participatory as $key => $budget) {
+				$source = [
+					'lat' => $budget->latitude,
+					'lng' => $budget->longitude
+				];
 
-                $destination = [
-                    'lat' => $user->latitude,
-                    'lng' => $user->longitude
-                ];
+				$destination = [
+					'lat' => $user->latitude,
+					'lng' => $user->longitude
+				];
 
-                $mile = $this->calculate_distance($source, $destination);
+				$mile = $this->calculate_distance($source, $destination);
 
-                if ($mile > 30) {
-                    $participatory->forget($key);
-                } else {
-                    $result[] = $budget->id;
-                }
-            }
-        }else{
-            return response()->json(['Error' => 'User Latitude Or Longitude is empty']);
-        }
-        if(count($result) > 0){
+				if ($mile > 30) {
+					$participatory->forget($key);
+				} else {
+					$result[] = $budget->id;
+				}
+			}
+		}else{
+			return response()->json(['Error' => 'User Latitude Or Longitude is empty']);
+		}
+		if(count($result) > 0){
 
-        }else{
-            $data = [];
-            return response()->json(['msg' => 'success', 'data' => $data, 'count' => count($participatory)]);
-        }
+		}else{
+			$data = [];
+			return response()->json(['msg' => 'success', 'data' => $data, 'count' => count($participatory)]);
+		}
 
-        if ($count != 0) {
-            if ($type == "l") {
-                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->whereIn('id', $result)->orderBy( 'status', 'asc' )->orderBy( 'created_at', 'desc' )->limit($count)->get();
-            } else {
-                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id', $user_id)->orderBy( 'status', 'asc' )->orderBy( 'created_at', 'desc' )->limit($count)->get();
-            }
-        } else {
-            if ($type == "l") {
-                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->whereIn('id', $result)->orderBy( 'status', 'asc' )->orderBy( 'created_at', 'desc' )->get();
-            } else {
-                $participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id', $user_id)->orderBy( 'status', 'asc' )->orderBy( 'created_at', 'desc' )->get();
-            }
-        }
-
-
-        return response()->json(['msg' => 'success', 'data' => $participatory_budget, 'count' => count($participatory)]);
-    }
-
-    public function save(Request $request)
-    {
-
-        $validator = Validator::make( $request->all(), [
-            'title'         => 'required|max:255',
-            'description'   => 'required',
-            'address'       => 'required',
-            'latitude'      => 'required',
-            'longitude'     => 'required',
-            'audience'      => 'required',
-            'start_date'    => 'required|date',
-            'end_date'      => 'required|date',
-            'start_time'    => 'required',
-            'end_time'      => 'required',
-            'user_id'       => 'required',
-            'participation' => 'required',
-            'vote_question' => 'required',
-            'budget'        => 'required',
-            'proposed_summary' => 'required',
-            'budget_benefits' => 'required',
-            'currency' => 'required',
-        ]);
-        if ( $validator->fails() ) {
-            $messages = $validator->messages()->all();
-
-            return response()->json( [
-                'status'  => 'Error',
-                'message' => $messages[0],
-            ], 200 );
-        }
+		if ($count != 0) {
+			if ($type == "l") {
+				$participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->whereIn('id', $result)->orderBy( 'status', 'asc' )->orderBy( 'created_at', 'desc' )->limit($count)->get();
+			} else {
+				$participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id', $user_id)->orderBy( 'status', 'asc' )->orderBy( 'created_at', 'desc' )->limit($count)->get();
+			}
+		} else {
+			if ($type == "l") {
+				$participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->whereIn('id', $result)->orderBy( 'status', 'asc' )->orderBy( 'created_at', 'desc' )->get();
+			} else {
+				$participatory_budget = ParticipatoryBudget::withCount('comments', 'likes')->with('comments', 'options')->where('user_id', $user_id)->orderBy( 'status', 'asc' )->orderBy( 'created_at', 'desc' )->get();
+			}
+		}
 
 
-        if (isset($request->id)) {
-            $participatory_budget = ParticipatoryBudget::find($request->id);
-        } else {
-            $participatory_budget = new ParticipatoryBudget;
-        }
+		return response()->json(['msg' => 'success', 'data' => $participatory_budget, 'count' => count($participatory)]);
+	}
 
-        $participatory_budget->title = $request->title;
-        $participatory_budget->description = $request->description;
-        $participatory_budget->address = $request->address;
-        $participatory_budget->latitude = $request->latitude;
-        $participatory_budget->longitude = $request->longitude;
-        $participatory_budget->audience = $request->audience;
-        $participatory_budget->start_date = $request->start_date;
-        $participatory_budget->end_date = $request->end_date;
-        $participatory_budget->start_time = $request->start_time;
-        $participatory_budget->end_time = $request->end_time;
-        $participatory_budget->participation = $request->participation;
-        $participatory_budget->vote_question = $request->vote_question;
-        $participatory_budget->budget = $request->budget;
-        $participatory_budget->proposed_summary = $request->proposed_summary;
-        $participatory_budget->budget_benefits = $request->budget_benefits;
-        $participatory_budget->timezone = $request->timezone;
-        $participatory_budget->user_id = $request->user_id;
-        $participatory_budget->currency = $request->currency;
+	public function save(Request $request)
+	{
 
-        if ($participatory_budget->save()) {
-            if (!isset($request->id)) {
+		$validator = Validator::make( $request->all(), [
+			'title'         => 'required|max:255',
+			'description'   => 'required',
+			'address'       => 'required',
+			'latitude'      => 'required',
+			'longitude'     => 'required',
+			'audience'      => 'required',
+			'start_date'    => 'required|date',
+			'end_date'      => 'required|date',
+			'start_time'    => 'required',
+			'end_time'      => 'required',
+			'user_id'       => 'required',
+			'participation' => 'required',
+			'vote_question' => 'required',
+			'budget'        => 'required',
+			'proposed_summary' => 'required',
+			'budget_benefits' => 'required',
+			'currency' => 'required',
+		]);
+		if ( $validator->fails() ) {
+			$messages = $validator->messages()->all();
 
-                foreach ($request->vote_option as $key => $vote_option) {
-                    $option = new Option;
-                    $option->parent_id = $participatory_budget->id;
-                    $option->vote_option = $vote_option;
-                    $option->vote_description = $request->vote_description[$key];
-                    $option->save();
-                }
-            }
-        }
+			return response()->json( [
+				                         'status'  => 'Error',
+				                         'message' => $messages[0],
+			                         ], 200 );
+		}
 
 
-        return response()->json($participatory_budget);
+		if (isset($request->id)) {
+			$participatory_budget = ParticipatoryBudget::find($request->id);
+		} else {
+			$participatory_budget = new ParticipatoryBudget;
+		}
 
-    }
+		$participatory_budget->title = $request->title;
+		$participatory_budget->description = $request->description;
+		$participatory_budget->address = $request->address;
+		$participatory_budget->latitude = $request->latitude;
+		$participatory_budget->longitude = $request->longitude;
+		$participatory_budget->audience = $request->audience;
+		$participatory_budget->start_date = $request->start_date;
+		$participatory_budget->end_date = $request->end_date;
+		$participatory_budget->start_time = $request->start_time;
+		$participatory_budget->end_time = $request->end_time;
+		$participatory_budget->participation = $request->participation;
+		$participatory_budget->vote_question = $request->vote_question;
+		$participatory_budget->budget = $request->budget;
+		$participatory_budget->proposed_summary = $request->proposed_summary;
+		$participatory_budget->budget_benefits = $request->budget_benefits;
+		$participatory_budget->timezone = $request->timezone;
+		$participatory_budget->user_id = $request->user_id;
+		$participatory_budget->currency = $request->currency;
 
-    public function find($id)
-    {
-        $participatory_budget = ParticipatoryBudget::with('comments', 'options')->withCount('comments', 'likes')->find($id);
-        return response()->json($participatory_budget);
-    }
+		if ($participatory_budget->save()) {
+			if (!isset($request->id)) {
 
-    public function comment(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required',
-            'comment' => 'required',
-            'parent_id' => 'required',
-        ]);
+				foreach ($request->vote_option as $key => $vote_option) {
+					$option = new Option;
+					$option->parent_id = $participatory_budget->id;
+					$option->vote_option = $vote_option;
+					$option->vote_description = $request->vote_description[$key];
+					$option->save();
+				}
+			}
+		}
 
-        if ($validator->fails()) {
-            $messages = $validator->messages()->all();
 
-            return response()->json([
-                'status' => 'Error',
-                'message' => $messages[0],
-            ], 200);
-        }
+		return response()->json($participatory_budget);
 
-        $comment = new Comment;
-        $comment->user_id = $request->user_id;
-        $comment->parent_id = $request->parent_id;
-        $comment->comment = $request->comment;
-        $comment->save();
+	}
 
-        $comments = Comment::where('parent_id', $request->parent_id)->get();
+	public function find($id)
+	{
+		$participatory_budget = ParticipatoryBudget::with('comments', 'options')->withCount('comments', 'likes')->find($id);
+		return response()->json($participatory_budget);
+	}
 
-        $participatory_budget = ParticipatoryBudget::find($request->parent_id);
-        if ($participatory_budget->participation == 1) {
-            $post['user_id'] = $participatory_budget->user_id;
-            $post['object_id'] = $participatory_budget->id;
-            $post['action'] = "Commented";
-            $post['type'] = "Participatory Budget";
-            $post['vote_question'] = $participatory_budget->vote_question;
-            $post['message'] = $participatory_budget->description;
-            $post['url'] = "https://staging.rarare.com/budget-proposal?id=" . $request->parent_id;
-            $post['title'] = $participatory_budget->title;
-            $post['sender_id'] = $request->user_id;
-            $this->send_notification($post);
-        }
-        return response()->json($comments);
-    }
+	public function comment(Request $request)
+	{
+		$validator = Validator::make($request->all(), [
+			'user_id' => 'required',
+			'comment' => 'required',
+			'parent_id' => 'required',
+		]);
 
-    public function like(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required',
-            'parent_id' => 'required',
-        ]);
+		if ($validator->fails()) {
+			$messages = $validator->messages()->all();
 
-        if ($validator->fails()) {
-            $messages = $validator->messages()->all();
+			return response()->json([
+				                        'status' => 'Error',
+				                        'message' => $messages[0],
+			                        ], 200);
+		}
 
-            return response()->json([
-                'status' => 'Error',
-                'message' => $messages[0],
-            ], 200);
-        }
+		$comment = new Comment;
+		$comment->user_id = $request->user_id;
+		$comment->parent_id = $request->parent_id;
+		$comment->comment = $request->comment;
+		$comment->save();
 
-        $liked = Like::where(['user_id' => $request->user_id, 'parent_id' => $request->parent_id])->first();
-        if (!is_null($liked)) {
-            $liked->delete();
-            $likes = Like::where(['parent_id' => $request->parent_id])->count();
+		$comments = Comment::where('parent_id', $request->parent_id)->get();
 
-            return response()->json($likes);
-        }
+		$participatory_budget = ParticipatoryBudget::find($request->parent_id);
+		if ($participatory_budget->participation == 1) {
+			$post['user_id'] = $participatory_budget->user_id;
+			$post['object_id'] = $participatory_budget->id;
+			$post['action'] = "Commented";
+			$post['type'] = "Participatory Budget";
+			$post['vote_question'] = $participatory_budget->vote_question;
+			$post['message'] = $participatory_budget->description;
+			$post['url'] = "https://staging.rarare.com/budget-proposal?id=" . $request->parent_id;
+			$post['title'] = $participatory_budget->title;
+			$post['sender_id'] = $request->user_id;
+			$this->send_notification($post);
+		}
+		return response()->json($comments);
+	}
 
-        $like = new Like;
-        $like->user_id = $request->user_id;
-        $like->parent_id = $request->parent_id;
-        $like->save();
+	public function like(Request $request)
+	{
+		$validator = Validator::make($request->all(), [
+			'user_id' => 'required',
+			'parent_id' => 'required',
+		]);
 
-        $likes = Like::where(['parent_id' => $request->parent_id])->count();
+		if ($validator->fails()) {
+			$messages = $validator->messages()->all();
 
-        $participatory_budget = ParticipatoryBudget::find($request->parent_id);
-        if ($participatory_budget->participation == 1) {
-            $post['user_id'] = $participatory_budget->user_id;
-            $post['object_id'] = $participatory_budget->id;
-            $post['action'] = "Liked";
-            $post['type'] = "Participatory Budget";
-            $post['vote_question'] = $participatory_budget->vote_question;
-            $post['message'] = $participatory_budget->description;
-            $post['url'] = "https://staging.rarare.com/budget-proposal?id=" . $request->parent_id;
-            $post['title'] = $participatory_budget->title;
-            $post['sender_id'] = $request->user_id;
+			return response()->json([
+				                        'status' => 'Error',
+				                        'message' => $messages[0],
+			                        ], 200);
+		}
 
-            $this->send_notification($post);
-        }
+		$liked = Like::where(['user_id' => $request->user_id, 'parent_id' => $request->parent_id])->first();
+		if (!is_null($liked)) {
+			$liked->delete();
+			$likes = Like::where(['parent_id' => $request->parent_id])->count();
 
-        return response()->json($likes);
-    }
+			return response()->json($likes);
+		}
 
-    public function user_option(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required',
-            'parent_id' => 'required',
-            'option_id' => 'required',
-        ]);
+		$like = new Like;
+		$like->user_id = $request->user_id;
+		$like->parent_id = $request->parent_id;
+		$like->save();
 
-        if ($validator->fails()) {
-            $messages = $validator->messages()->all();
+		$likes = Like::where(['parent_id' => $request->parent_id])->count();
 
-            return response()->json([
-                'status' => 'Error',
-                'message' => $messages[0],
-            ], 200);
-        }
+		$participatory_budget = ParticipatoryBudget::find($request->parent_id);
+		if ($participatory_budget->participation == 1) {
+			$post['user_id'] = $participatory_budget->user_id;
+			$post['object_id'] = $participatory_budget->id;
+			$post['action'] = "Liked";
+			$post['type'] = "Participatory Budget";
+			$post['vote_question'] = $participatory_budget->vote_question;
+			$post['message'] = $participatory_budget->description;
+			$post['url'] = "https://staging.rarare.com/budget-proposal?id=" . $request->parent_id;
+			$post['title'] = $participatory_budget->title;
+			$post['sender_id'] = $request->user_id;
 
-        $user_option = new UserOption;
-        $user_option->user_id = $request->user_id;
-        $user_option->parent_id = $request->parent_id;
-        $user_option->option_id = $request->option_id;
-        $user_option->save();
+			$this->send_notification($post);
+		}
 
-        $participatory_budget = ParticipatoryBudget::find($request->parent_id);
+		return response()->json($likes);
+	}
 
-        $option_array = array();
-        $option = Option::where(['parent_id' => $request->parent_id])->get();
+	public function user_option(Request $request)
+	{
+		$validator = Validator::make($request->all(), [
+			'user_id' => 'required',
+			'parent_id' => 'required',
+			'option_id' => 'required',
+		]);
 
-        if ($participatory_budget->audience <= count($option)) {
-            $participatory_budget->status = 1;
-            $participatory_budget->save();
-        }
+		if ($validator->fails()) {
+			$messages = $validator->messages()->all();
 
-        foreach ($option as $item) {
-            $option_array[$item->id] = count(UserOption::where(['option_id' => $item->id])->get());
-        }
+			return response()->json([
+				                        'status' => 'Error',
+				                        'message' => $messages[0],
+			                        ], 200);
+		}
 
-        $participatory_budget = ParticipatoryBudget::find($request->parent_id);
-        if ($participatory_budget->participation == 1) {
-            $post['user_id'] = $participatory_budget->user_id;
-            $post['object_id'] = $participatory_budget->id;
-            $post['action'] = "Voted";
-            $post['type'] = "Participatory Budget";
-            $post['vote_question'] = $participatory_budget->vote_question;
-            $post['message'] = $participatory_budget->description;
-            $post['url'] = "https://staging.rarare.com/budget-proposal?id=" . $request->parent_id;
-            $post['title'] = $participatory_budget->title;
-            $post['sender_id'] = $request->user_id;
-            $this->send_notification($post);
-        }
+		$user_option = new UserOption;
+		$user_option->user_id = $request->user_id;
+		$user_option->parent_id = $request->parent_id;
+		$user_option->option_id = $request->option_id;
+		$user_option->save();
 
-        return response()->json($option_array);
-    }
+		$participatory_budget = ParticipatoryBudget::find($request->parent_id);
 
-    public function delete($id)
-    {
-        $participatory_budget = ParticipatoryBudget::with('comments', 'options', 'likes', 'user_option')->find($id);
-        if (!is_null($participatory_budget)) {
-            $participatory_budget->comments()->delete();
-            $participatory_budget->user_option()->delete();
-            $participatory_budget->likes()->delete();
-            $participatory_budget->options()->delete();
-            $participatory_budget->delete();
-        }
-        return response()->json(['message' => 'Deleted']);
-    }
+		$option_array = array();
+		$option = Option::where(['parent_id' => $request->parent_id])->get();
 
-    public function send_notification($post)
-    {
-        $curl = curl_init();
+		if ($participatory_budget->audience <= count($option)) {
+			$participatory_budget->status = 1;
+			$participatory_budget->save();
+		}
 
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://rrci.staging.rarare.com/proposal/subscribe/email',
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => array(
-                'title' => $post['title'],
-                'type' => $post['type'],
-                'vote_question' => $post['vote_question'],
-                'message' => $post['message'],
-                'action' => $post['action'],
-                'url' => $post['url'],
-                'user_id' => $post['user_id'],
-                'object_id' => $post['object_id'],
-                'sender_id' => $post['sender_id']
-            ),
-        ));
+		foreach ($option as $item) {
+			$option_array[$item->id] = count(UserOption::where(['option_id' => $item->id])->get());
+		}
 
-        $response = curl_exec($curl);
+		$participatory_budget = ParticipatoryBudget::find($request->parent_id);
+		if ($participatory_budget->participation == 1) {
+			$post['user_id'] = $participatory_budget->user_id;
+			$post['object_id'] = $participatory_budget->id;
+			$post['action'] = "Voted";
+			$post['type'] = "Participatory Budget";
+			$post['vote_question'] = $participatory_budget->vote_question;
+			$post['message'] = $participatory_budget->description;
+			$post['url'] = "https://staging.rarare.com/budget-proposal?id=" . $request->parent_id;
+			$post['title'] = $participatory_budget->title;
+			$post['sender_id'] = $request->user_id;
+			$this->send_notification($post);
+		}
 
-        curl_close($curl);
+		return response()->json($option_array);
+	}
 
-        return true;
-    }
+	public function delete($id)
+	{
+		$participatory_budget = ParticipatoryBudget::with('comments', 'options', 'likes', 'user_option')->find($id);
+		if (!is_null($participatory_budget)) {
+			$participatory_budget->comments()->delete();
+			$participatory_budget->user_option()->delete();
+			$participatory_budget->likes()->delete();
+			$participatory_budget->options()->delete();
+			$participatory_budget->delete();
+		}
+		return response()->json(['message' => 'Deleted']);
+	}
 
-    public function get_user($id)
-    {
-        $curl = curl_init();
+	public function send_notification($post)
+	{
+		$curl = curl_init();
 
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://rrci.staging.rarare.com/user/' . $id,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'GET',
-        ));
+		curl_setopt_array($curl, array(
+			CURLOPT_URL => 'https://rrci.staging.rarare.com/proposal/subscribe/email',
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_ENCODING => '',
+			CURLOPT_MAXREDIRS => 10,
+			CURLOPT_TIMEOUT => 0,
+			CURLOPT_FOLLOWLOCATION => true,
+			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+			CURLOPT_CUSTOMREQUEST => 'POST',
+			CURLOPT_POSTFIELDS => array(
+				'title' => $post['title'],
+				'type' => $post['type'],
+				'vote_question' => $post['vote_question'],
+				'message' => $post['message'],
+				'action' => $post['action'],
+				'url' => $post['url'],
+				'user_id' => $post['user_id'],
+				'object_id' => $post['object_id'],
+				'sender_id' => $post['sender_id']
+			),
+		));
 
-        $response = curl_exec($curl);
+		$response = curl_exec($curl);
 
-        curl_close($curl);
-        return json_decode($response);
-    }
+		curl_close($curl);
 
-    function calculate_distance($source, $destination)
-    {
-        $lat1  = floatval($source['lat']);
-        $lon1  = floatval($source['lng']);
-        $lat2  = floatval($destination['lat']);
-        $lon2  = floatval($destination['lng']);
-        $theta = $lon1 - $lon2;
-        $dist  = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
-        $dist  = acos($dist);
-        $dist  = rad2deg($dist);
-        $miles = $dist * 60 * 1.1515;
+		return true;
+	}
 
-        return $miles;
-    }
+	public function get_user($id)
+	{
+		$curl = curl_init();
+
+		curl_setopt_array($curl, array(
+			CURLOPT_URL => 'https://rrci.staging.rarare.com/user/' . $id,
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_ENCODING => '',
+			CURLOPT_MAXREDIRS => 10,
+			CURLOPT_TIMEOUT => 0,
+			CURLOPT_FOLLOWLOCATION => true,
+			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+			CURLOPT_CUSTOMREQUEST => 'GET',
+		));
+
+		$response = curl_exec($curl);
+
+		curl_close($curl);
+		return json_decode($response);
+	}
+
+	function calculate_distance($source, $destination)
+	{
+		$lat1  = floatval($source['lat']);
+		$lon1  = floatval($source['lng']);
+		$lat2  = floatval($destination['lat']);
+		$lon2  = floatval($destination['lng']);
+		$theta = $lon1 - $lon2;
+		$dist  = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
+		$dist  = acos($dist);
+		$dist  = rad2deg($dist);
+		$miles = $dist * 60 * 1.1515;
+
+		return $miles;
+	}
 }
